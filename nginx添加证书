@@ -14,6 +14,59 @@ server {
 
 生成证书：
 ~/.acme.sh/acme.sh --issue -d www.baidu.com -w /var/www/html
+输出
+```
+[Mon Nov  5 17:55:12 CST 2018] Creating domain key
+[Mon Nov  5 17:55:13 CST 2018] The domain key is here: /root/.acme.sh/www.baidu.com/www.baidu.com.key
+[Mon Nov  5 17:55:13 CST 2018] Single domain='www.baidu.com'
+[Mon Nov  5 17:55:13 CST 2018] Getting domain auth token for each domain
+[Mon Nov  5 17:55:13 CST 2018] Getting webroot for domain='www.baidu.com'
+[Mon Nov  5 17:55:13 CST 2018] Getting new-authz for domain='www.baidu.com'
+[Mon Nov  5 17:55:17 CST 2018] The new-authz request is ok.
+[Mon Nov  5 17:55:17 CST 2018] Verifying:www.baidu.com
+[Mon Nov  5 17:55:24 CST 2018] Success
+[Mon Nov  5 17:55:24 CST 2018] Verify finished, start to sign.
+[Mon Nov  5 17:55:27 CST 2018] Cert success.
+-----BEGIN CERTIFICATE-----
+MIIGEDCCBPigAwIBAgISA0TZQFrZhNCHNRvHtRU3g5OsMA0GCSqGSIb3DQEBCwUA
+MEoxCzAJBgNVBAYTAlVTMRYwFAYDVQQKEw1MZXQncyBFbmNyeXB0MSMwIQYDVQQD
+ExpMZXQncyBFbmNyeXB0IEF1dGhvcml0eSBYMzAeFw0xODExMDUwODU1MjZaFw0x
+OTAyMDMwODU1MjZaMB0xGzAZBgNVBAMTEnBheS50LnpoaWtldG9uZy5jbjCCASIw
+DQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALAPk77qsY4uKwtqB3latkupwrTb
+oIHmwFH+cAE0nkStixwXz/3FWht3YDyQ/m5hu6zw/opXIbEnpzZuP0+wqyAMEyTS
+LJVWq/lgd/H8a3M/+LT6kUTac9HHFbkYs6DDjExWFRxoHKahJlrZnBGw5UNFKo92
+kbrGC/+uWp5uEw6xQmYhmIs5ikxfl52BcGgm+htShE9d9nym0XULGfJiYPKzu4Jw
+juet8q9lb4aNAlAN+DG/NpLJUyuLr1oum9PfVVzgyVSWlkyNB9fFe7euk7xsEsjU
+Bv93m7LcMYP0/UVA/t7R3yxY2zOp+mw4BfAYe+qH5WNIxQfaxPzOi/BUhJ0CAwEA
+AaOCAxswggMXMA4GA1UdDwEB/wQEAwIFoDAdBgNVHSUEFjAUBggrBgEFBQcDAQYI
+KwYBBQUHAwIwDAYDVR0TAQH/BAIwADAdBgNVHQ4EFgQUtaDAcNHCYcAu8Lfp1Hzk
+KiHRXz4wHwYDVR0jBBgwFoAUqEpqYwR93brm0Tm3pkVl7/Oo7KEwbwYIKwYBBQUH
+AQEEYzBhMC4GCCsGAQUFBzABhiJodHRwOi8vb2NzcC5pbnQteDMubGV0c2VuY3J5
+cHQub3JnMC8GCCsGAQUFBzAChiNodHRwOi8vY2VydC5pbnQteDMubGV0c2VuY3J5
+cHQub3JnLzAdBgNVHREEFjAUghJwYXkudC56aGlrZXRvbmcuY24wgf4GA1UdIASB
+9jCB8zAIBgZngQwBAgEwgeYGCysGAQQBgt8TAQEBMIHWMCYGCCsGAQUFBwIBFhpo
+dHRwOi8vY3BzLmxldHNlbmNyeXB0Lm9yZzCBqwYIKwYBBQUHAgIwgZ4MgZtUaGlz
+IENlcnRpZmljYXRlIG1heSBvbmx5IGJlIHJlbGllZCB1cG9uIGJ5IFJlbHlpbmcg
+UGFydGllcyBhbmQgb25seSBpbiBhY2NvcmRhbmNlIHdpdGggdGhlIENlcnRpZmlj
+YXRlIFBvbGljeSBmb3VuZCBhdCBodHRwczovL2xldHNlbmNyeXB0Lm9yZy9yZXBv
+c2l0b3J5LzCCAQUGCisGAQQB1nkCBAIEgfYEgfMA8QB3ACk8UZZUyDlluqpQ/FgH
+1Ldvv1h6KXLcpMMM9OVFR/R4AAABZuNMZdwAAAQDAEgwRgIhANSFflATR5dTY8uv
+a5PVdTnKOUbAbLbvGe0kil03oYOBAiEA3BVOPSgfcSARj2+UYm3UtgvpcXBkLM/O
+r4fcU6DwcC0AdgBvU3asMfAxGdiZAKRRFf93FRwR2QLBACkGjbIImjfZEwAAAWbj
+TGhVAAAEAwBHMEUCIQCRuXQIbVfnGYlun8AdLJu4Of0VyJdLaAkRemkJk4iLtgIg
+Fi2Tku03YDvEfgbe4m5//QiRIhbb3ANAVPRoGlbD23MwDQYJKoZIhvcNAQELBQAD
+ggEBAJwOBY2bHlXMu4Qts8aE39bYOCLPBrbycAO8tr75UVrIBlYlao5Bef2Nth7s
+Xfkd+pHFcqesdFCg/Pvkdm+wdOcPSbRrP5qI6ElboGtM8HaToR4y8TAb3Wxx5tSE
+AkP6oUKbXa116EXyOX9131T9SXOVUPyua3vmSd42AJT7viviJchE79mOzGJokYCs
+//GxcKQgdM+J4DdLlOTuh5oOyYlrcbN6fQ2xFpgn9dzzfjOfzzhtmyQln5AM05t0
+cHSvQFAj8VRw9+L5VMtJ1armbkeq1D7UKwpk3j7tboKD/YAqBDTvebyvkEc+VXT5
+gHHvtaJw1vNOxwfhYelid9Jx+v8=
+-----END CERTIFICATE-----
+[Mon Nov  5 17:55:27 CST 2018] Your cert is in  /root/.acme.sh/www.baidu.com/www.baidu.com.cer 
+[Mon Nov  5 17:55:27 CST 2018] Your cert key is in  /root/.acme.sh/www.baidu.com/www.baidu.com.key 
+[Mon Nov  5 17:55:29 CST 2018] The intermediate CA cert is in  /root/.acme.sh/www.baidu.com/ca.cer 
+[Mon Nov  5 17:55:29 CST 2018] And the full chain certs is there:  /root/.acme.sh/www.baidu.com/fullchain.cer 
+```
 mkdir ~/.acme.sh/www.baidu.com/backup
 cp ~/.acme.sh/www.baidu.com/www.baidu.com.key ~/.acme.sh/www.baidu.com/backup
 ~/.acme.sh/acme.sh --installcert -d www.baidu.com --key-file ~/.acme.sh/www.baidu.com/www.baidu.com.key --fullchain-file ~/.acme.sh/www.baidu.com/www.baidu.com.pem

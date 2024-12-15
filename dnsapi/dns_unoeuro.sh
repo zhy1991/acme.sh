@@ -1,11 +1,15 @@
 #!/usr/bin/env sh
+# shellcheck disable=SC2034
+dns_unoeuro_info='unoeuro.com
+ Deprecated. The unoeuro.com is now simply.com
+Site: unoeuro.com
+Docs: github.com/acmesh-official/acme.sh/wiki/dnsapi#dns_unoeuro
+Options:
+ UNO_Key API Key
+ UNO_User Username
+'
 
-#
-#UNO_Key="sdfsdfsdfljlbjkljlkjsdfoiwje"
-#
-#UNO_User="UExxxxxx"
-
-Uno_Api="https://api.unoeuro.com/1"
+Uno_Api="https://api.simply.com/1"
 
 ########  Public functions #####################
 
@@ -21,12 +25,6 @@ dns_unoeuro_add() {
     UNO_User=""
     _err "You haven't specified a UnoEuro api key and account yet."
     _err "Please create your key and try again."
-    return 1
-  fi
-
-  if ! _contains "$UNO_User" "UE"; then
-    _err "It seems that the UNO_User=$UNO_User is not a valid username."
-    _err "Please check and retry."
     return 1
   fi
 
@@ -52,7 +50,7 @@ dns_unoeuro_add() {
   fi
   _info "Adding record"
 
-  if _uno_rest POST "my/products/$h/dns/records" "{\"name\":\"$fulldomain\",\"type\":\"TXT\",\"data\":\"$txtvalue\",\"ttl\":120}"; then
+  if _uno_rest POST "my/products/$h/dns/records" "{\"name\":\"$fulldomain\",\"type\":\"TXT\",\"data\":\"$txtvalue\",\"ttl\":120,\"priority\":0}"; then
     if _contains "$response" "\"status\": 200" >/dev/null; then
       _info "Added, OK"
       return 0
@@ -135,7 +133,7 @@ _get_root() {
   i=2
   p=1
   while true; do
-    h=$(printf "%s" "$domain" | cut -d . -f $i-100)
+    h=$(printf "%s" "$domain" | cut -d . -f "$i"-100)
     _debug h "$h"
     if [ -z "$h" ]; then
       #not valid
@@ -149,7 +147,7 @@ _get_root() {
     if _contains "$response" "\"status\": 200"; then
       _domain_id=$h
       if [ "$_domain_id" ]; then
-        _sub_domain=$(printf "%s" "$domain" | cut -d . -f 1-$p)
+        _sub_domain=$(printf "%s" "$domain" | cut -d . -f 1-"$p")
         _domain=$h
         return 0
       fi

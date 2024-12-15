@@ -1,9 +1,14 @@
 #!/usr/bin/env sh
+# shellcheck disable=SC2034
+dns_namecom_info='Name.com
+Site: Name.com
+Docs: github.com/acmesh-official/acme.sh/wiki/dnsapi#dns_namecom
+Options:
+ Namecom_Username Username
+ Namecom_Token API Token
+Author: RaidenII
+'
 
-#Author: RaidenII
-#Created 06/28/2017
-#Updated 03/01/2018, rewrote to support name.com API v4
-#Utilize name.com API to finish dns-01 verifications.
 ########  Public functions #####################
 
 Namecom_API="https://api.name.com/v4"
@@ -13,6 +18,8 @@ dns_namecom_add() {
   fulldomain=$1
   txtvalue=$2
 
+  Namecom_Username="${Namecom_Username:-$(_readaccountconf_mutable Namecom_Username)}"
+  Namecom_Token="${Namecom_Token:-$(_readaccountconf_mutable Namecom_Token)}"
   # First we need name.com credentials.
   if [ -z "$Namecom_Username" ]; then
     Namecom_Username=""
@@ -27,10 +34,11 @@ dns_namecom_add() {
     _err "Please specify that in your environment variable."
     return 1
   fi
-
+  _debug Namecom_Username "$Namecom_Username"
+  _secure_debug Namecom_Token "$Namecom_Token"
   # Save them in configuration.
-  _saveaccountconf Namecom_Username "$Namecom_Username"
-  _saveaccountconf Namecom_Token "$Namecom_Token"
+  _saveaccountconf_mutable Namecom_Username "$Namecom_Username"
+  _saveaccountconf_mutable Namecom_Token "$Namecom_Token"
 
   # Login in using API
   if ! _namecom_login; then
@@ -46,7 +54,7 @@ dns_namecom_add() {
   # Add TXT record.
   _namecom_addtxt_json="{\"host\":\"$_sub_domain\",\"type\":\"TXT\",\"answer\":\"$txtvalue\",\"ttl\":\"300\"}"
   if _namecom_rest POST "domains/$_domain/records" "$_namecom_addtxt_json"; then
-    _retvalue=$(printf "%s\n" "$response" | _egrep_o "\"$_sub_domain\"")
+    _retvalue=$(echo "$response" | _egrep_o "\"$_sub_domain\"")
     if [ "$_retvalue" ]; then
       _info "Successfully added TXT record, ready for validation."
       return 0
@@ -63,6 +71,8 @@ dns_namecom_rm() {
   fulldomain=$1
   txtvalue=$2
 
+  Namecom_Username="${Namecom_Username:-$(_readaccountconf_mutable Namecom_Username)}"
+  Namecom_Token="${Namecom_Token:-$(_readaccountconf_mutable Namecom_Token)}"
   if ! _namecom_login; then
     return 1
   fi
@@ -75,7 +85,7 @@ dns_namecom_rm() {
 
   # Get the record id.
   if _namecom_rest GET "domains/$_domain/records"; then
-    _record_id=$(printf "%s\n" "$response" | _egrep_o "\"id\":[0-9]+,\"domainName\":\"$_domain\",\"host\":\"$_sub_domain\",\"fqdn\":\"$fulldomain.\",\"type\":\"TXT\",\"answer\":\"$txtvalue\"" | cut -d \" -f 3 | _egrep_o [0-9]+)
+    _record_id=$(echo "$response" | _egrep_o "\"id\":[0-9]+,\"domainName\":\"$_domain\",\"host\":\"$_sub_domain\",\"fqdn\":\"$fulldomain.\",\"type\":\"TXT\",\"answer\":\"$txtvalue\"" | cut -d \" -f 3 | _egrep_o [0-9]+)
     _debug record_id "$_record_id"
     if [ "$_record_id" ]; then
       _info "Successfully retrieved the record id for ACME challenge."
@@ -126,10 +136,12 @@ _namecom_login() {
   _namecom_auth=$(printf "%s:%s" "$Namecom_Username" "$Namecom_Token" | _base64)
 
   if _namecom_rest GET "hello"; then
-    retcode=$(printf "%s\n" "$response" | _egrep_o "\"username\"\:\"$Namecom_Username\"")
+    retcode=$(echo "$response" | _egrep_o "\"username\"\:\"$Namecom_Username\"")
     if [ "$retcode" ]; then
       _info "Successfully logged in."
     else
+      _err "$response"
+      _err "Please add your ip to api whitelist"
       _err "Logging in failed."
       return 1
     fi
@@ -147,15 +159,15 @@ _namecom_get_root() {
 
   # Need to exclude the last field (tld)
   numfields=$(echo "$domain" | _egrep_o "\." | wc -l)
-  while [ $i -le "$numfields" ]; do
-    host=$(printf "%s" "$domain" | cut -d . -f $i-100)
+  while [ "$i" -le "$numfields" ]; do
+    host=$(printf "%s" "$domain" | cut -d . -f "$i"-100)
     _debug host "$host"
     if [ -z "$host" ]; then
       return 1
     fi
 
     if _contains "$response" "$host"; then
-      _sub_domain=$(printf "%s" "$domain" | cut -d . -f 1-$p)
+      _sub_domain=$(printf "%s" "$domain" | cut -d . -f 1-"$p")
       _domain="$host"
       return 0
     fi

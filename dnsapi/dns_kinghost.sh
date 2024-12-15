@@ -1,16 +1,17 @@
 #!/usr/bin/env sh
+# shellcheck disable=SC2034
+dns_kinghost_info='King.host
+Domains: KingHost.net KingHost.com.br
+Site: King.host
+Docs: github.com/acmesh-official/acme.sh/wiki/dnsapi#dns_kinghost
+Options:
+ KINGHOST_Username Username
+ KINGHOST_Password Password
+Author: Felipe Keller Braz <felipebraz@kinghost.com.br>
+'
 
-############################################################
 # KingHost API support                                     #
-# http://api.kinghost.net/doc/                             #
-#                                                          #
-# Author: Felipe Keller Braz <felipebraz@kinghost.com.br>  #
-# Report Bugs here: https://github.com/kinghost/acme.sh    #
-#                                                          #
-# Values to export:                                        #
-# export KINGHOST_Username="email@provider.com"            #
-# export KINGHOST_Password="xxxxxxxxxx"                    #
-############################################################
+# https://api.kinghost.net/doc/                             #
 
 KING_Api="https://api.kinghost.net/acme"
 
@@ -37,7 +38,7 @@ dns_kinghost_add() {
   _debug "Getting txt records"
   _kinghost_rest GET "dns" "name=$fulldomain&content=$txtvalue"
 
-  #This API call returns "status":"ok" if dns record does not exists
+  #This API call returns "status":"ok" if dns record does not exist
   #We are creating a new txt record here, so we expect the "ok" status
   if ! echo "$response" | grep '"status":"ok"' >/dev/null; then
     _err "Error"

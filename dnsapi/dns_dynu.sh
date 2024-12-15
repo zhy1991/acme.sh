@@ -1,20 +1,21 @@
 #!/usr/bin/env sh
+# shellcheck disable=SC2034
+dns_dynu_info='Dynu.com
+Site: Dynu.com
+Docs: github.com/acmesh-official/acme.sh/wiki/dnsapi#dns_dynu
+Options:
+ Dynu_ClientId Client ID
+ Dynu_Secret Secret
+Issues: github.com/shar0119/acme.sh
+Author: Dynu Systems Inc
+'
 
-#Client ID
-#Dynu_ClientId="0b71cae7-a099-4f6b-8ddf-94571cdb760d"
-#
-#Secret
-#Dynu_Secret="aCUEY4BDCV45KI8CSIC3sp2LKQ9"
-#
 #Token
 Dynu_Token=""
 #
 #Endpoint
-Dynu_EndPoint="https://api.dynu.com/v1"
-#
-#Author: Dynu Systems, Inc.
-#Report Bugs here: https://github.com/shar0119/acme.sh
-#
+Dynu_EndPoint="https://api.dynu.com/v2"
+
 ########  Public functions #####################
 
 #Usage: add _acme-challenge.www.domain.com "XKrxpRBosdIKFzxW_CT3KLZNf6q0HG9i01zxXp5CPBs"
@@ -51,11 +52,11 @@ dns_dynu_add() {
   _debug _domain_name "$_domain_name"
 
   _info "Creating TXT record."
-  if ! _dynu_rest POST "dns/record/add" "{\"domain_name\":\"$_domain_name\",\"node_name\":\"$_node\",\"record_type\":\"TXT\",\"text_data\":\"$txtvalue\",\"state\":true,\"ttl\":90}"; then
+  if ! _dynu_rest POST "dns/$dnsId/record" "{\"domainId\":\"$dnsId\",\"nodeName\":\"$_node\",\"recordType\":\"TXT\",\"textData\":\"$txtvalue\",\"state\":true,\"ttl\":90}"; then
     return 1
   fi
 
-  if ! _contains "$response" "text_data"; then
+  if ! _contains "$response" "200"; then
     _err "Could not add TXT record."
     return 1
   fi
@@ -125,20 +126,21 @@ _get_root() {
   i=2
   p=1
   while true; do
-    h=$(printf "%s" "$domain" | cut -d . -f $i-100)
+    h=$(printf "%s" "$domain" | cut -d . -f "$i"-100)
     _debug h "$h"
     if [ -z "$h" ]; then
       #not valid
       return 1
     fi
 
-    if ! _dynu_rest GET "dns/get/$h"; then
+    if ! _dynu_rest GET "dns/getroot/$h"; then
       return 1
     fi
 
-    if _contains "$response" "\"name\":\"$h\"" >/dev/null; then
+    if _contains "$response" "\"domainName\":\"$h\"" >/dev/null; then
+      dnsId=$(printf "%s" "$response" | tr -d "{}" | cut -d , -f 2 | cut -d : -f 2)
       _domain_name=$h
-      _node=$(printf "%s" "$domain" | cut -d . -f 1-$p)
+      _node=$(printf "%s" "$domain" | cut -d . -f 1-"$p")
       return 0
     fi
     p=$i
@@ -152,7 +154,7 @@ _get_recordid() {
   fulldomain=$1
   txtvalue=$2
 
-  if ! _dynu_rest GET "dns/record/get?hostname=$fulldomain&rrtype=TXT"; then
+  if ! _dynu_rest GET "dns/$dnsId/record"; then
     return 1
   fi
 
@@ -161,19 +163,18 @@ _get_recordid() {
     return 0
   fi
 
-  _dns_record_id=$(printf "%s" "$response" | _egrep_o "{[^}]*}" | grep "\"text_data\":\"$txtvalue\"" | _egrep_o ",[^,]*," | grep ',"id":' | tr -d ",," | cut -d : -f 2)
-
+  _dns_record_id=$(printf "%s" "$response" | sed -e 's/[^{]*\({[^}]*}\)[^{]*/\1\n/g' | grep "\"textData\":\"$txtvalue\"" | sed -e 's/.*"id":\([^,]*\).*/\1/')
   return 0
 }
 
 _delete_txt_record() {
   _dns_record_id=$1
 
-  if ! _dynu_rest GET "dns/record/delete/$_dns_record_id"; then
+  if ! _dynu_rest DELETE "dns/$dnsId/record/$_dns_record_id"; then
     return 1
   fi
 
-  if ! _contains "$response" "true"; then
+  if ! _contains "$response" "200"; then
     return 1
   fi
 
@@ -189,7 +190,7 @@ _dynu_rest() {
   export _H1="Authorization: Bearer $Dynu_Token"
   export _H2="Content-Type: application/json"
 
-  if [ "$data" ]; then
+  if [ "$data" ] || [ "$m" = "DELETE" ]; then
     _debug data "$data"
     response="$(_post "$data" "$Dynu_EndPoint/$ep" "" "$m")"
   else
@@ -216,8 +217,12 @@ _dynu_authentication() {
     _err "Authentication failed."
     return 1
   fi
-  if _contains "$response" "accessToken"; then
-    Dynu_Token=$(printf "%s" "$response" | tr -d "[]" | cut -d , -f 2 | cut -d : -f 2 | cut -d '"' -f 2)
+  if _contains "$response" "Authentication Exception"; then
+    _err "Authentication failed."
+    return 1
+  fi
+  if _contains "$response" "access_token"; then
+    Dynu_Token=$(printf "%s" "$response" | tr -d "{}" | cut -d , -f 1 | cut -d : -f 2 | cut -d '"' -f 2)
   fi
   if _contains "$Dynu_Token" "null"; then
     Dynu_Token=""

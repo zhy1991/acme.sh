@@ -1,10 +1,13 @@
 #!/usr/bin/env sh
-
-# bug reports to dev@1e.ca
-
-#
-#NS1_Key="sdfsdfsdfljlbjkljlkjsdfoiwje"
-#
+# shellcheck disable=SC2034
+dns_nsone_info='ns1.com
+Domains: ns1.net
+Site: ns1.com
+Docs: github.com/acmesh-official/acme.sh/wiki/dnsapi#dns_nsone
+Options:
+ NS1_Key API Key
+Author: <dev@1e.ca>
+'
 
 NS1_Api="https://api.nsone.net/v1"
 
@@ -46,7 +49,7 @@ dns_nsone_add() {
   if [ "$count" = "0" ]; then
     _info "Adding record"
 
-    if _nsone_rest PUT "zones/$_domain/$fulldomain/TXT" "{\"answers\":[{\"answer\":[\"$txtvalue\"]}],\"type\":\"TXT\",\"domain\":\"$fulldomain\",\"zone\":\"$_domain\"}"; then
+    if _nsone_rest PUT "zones/$_domain/$fulldomain/TXT" "{\"answers\":[{\"answer\":[\"$txtvalue\"]}],\"type\":\"TXT\",\"domain\":\"$fulldomain\",\"zone\":\"$_domain\",\"ttl\":0}"; then
       if _contains "$response" "$fulldomain"; then
         _info "Added"
         #todo: check if the record takes effect
@@ -62,7 +65,7 @@ dns_nsone_add() {
     prev_txt=$(printf "%s\n" "$response" | _egrep_o "\"domain\":\"$fulldomain\",\"short_answers\":\[\"[^,]*\]" | _head_n 1 | cut -d: -f3 | cut -d, -f1)
     _debug "prev_txt" "$prev_txt"
 
-    _nsone_rest POST "zones/$_domain/$fulldomain/TXT" "{\"answers\": [{\"answer\": [\"$txtvalue\"]},{\"answer\": $prev_txt}],\"type\": \"TXT\",\"domain\":\"$fulldomain\",\"zone\": \"$_domain\"}"
+    _nsone_rest POST "zones/$_domain/$fulldomain/TXT" "{\"answers\": [{\"answer\": [\"$txtvalue\"]},{\"answer\": $prev_txt}],\"type\": \"TXT\",\"domain\":\"$fulldomain\",\"zone\": \"$_domain\",\"ttl\":0}"
     if [ "$?" = "0" ] && _contains "$response" "$fulldomain"; then
       _info "Updated!"
       #todo: check if the record takes effect
@@ -116,7 +119,7 @@ _get_root() {
     return 1
   fi
   while true; do
-    h=$(printf "%s" "$domain" | cut -d . -f $i-100)
+    h=$(printf "%s" "$domain" | cut -d . -f "$i"-100)
     _debug h "$h"
     if [ -z "$h" ]; then
       #not valid
@@ -124,7 +127,7 @@ _get_root() {
     fi
 
     if _contains "$response" "\"zone\":\"$h\""; then
-      _sub_domain=$(printf "%s" "$domain" | cut -d . -f 1-$p)
+      _sub_domain=$(printf "%s" "$domain" | cut -d . -f 1-"$p")
       _domain="$h"
       return 0
     fi
